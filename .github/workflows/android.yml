@@ -46,11 +46,22 @@ jobs:
           echo "$HOME/Android/cmdline-tools/bin" >> $GITHUB_PATH
           echo "$HOME/Android/platform-tools" >> $GITHUB_PATH
 
-      # Step 6: Grant execute permissions to gradlew (if necessary)
+      # Step 6: Check if gradlew exists, and if not, download it
+      - name: Check for gradlew and download if missing
+        run: |
+          if [ ! -f gradlew ]; then
+            echo "gradlew not found, downloading..."
+            curl -L https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -o gradle.zip
+            unzip gradle.zip -d gradle
+            cp gradle/gradle-7.4.2/bin/gradlew .
+            chmod +x gradlew
+            rm -rf gradle gradle.zip
+          fi
+
+      # Step 7: Grant execute permissions to gradlew (if necessary)
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Step 7: Build the APK using gradlew
+      # Step 8: Build APK using gradlew
       - name: Build APK
         run: ./gradlew assembleDebug --stacktrace --warning-mode all --info --debug
-
