@@ -1,2 +1,3 @@
 rootProject.name = 'Athaiinfo'
-include ':app'  # Include the app module or other submodules if applicable
+include ':app' // Include the app module or other submodules if applicable
+
