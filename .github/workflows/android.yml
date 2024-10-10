@@ -1,4 +1,4 @@
-name: Build APK
+name: Android CI
 
 on:
   push:
@@ -11,60 +11,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      # Step 1: Checkout code
+      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up JDK 11 (AdoptOpenJDK/Temurin)
+      # Set up JDK 11
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'temurin'
+          distribution: 'adoptopenjdk'
 
-      # Step 3: Install Android SDK Command Line Tools
-      - name: Install Android SDK
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y wget unzip
-          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
-          unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android
-          rm commandlinetools-linux-7583922_latest.zip
-          yes | $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android --licenses
-          $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android "platforms;android-33" "build-tools;33.0.0"
-          $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android "platform-tools" "tools"
+      # Clean Gradle Cache (optional but helpful to avoid caching issues)
+      - name: Clean Gradle cache
+        run: rm -rf ~/.gradle/caches/
 
-      # Step 4: Set environment variables for Android SDK
-      - name: Set environment variables for Android SDK
-        run: echo "ANDROID_HOME=$HOME/Android" >> $GITHUB_ENV
+      # Ensure gradlew has executable permission
+      - name: Ensure gradlew has executable permission
+        run: chmod +x gradlew
 
-      # Step 5: Add Android SDK to PATH
-      - name: Add Android SDK to PATH
-        run: |
-          echo "$HOME/Android/cmdline-tools/bin" >> $GITHUB_PATH
-          echo "$HOME/Android/platform-tools" >> $GITHUB_PATH
-
-      # Step 6: Check if gradlew exists, generate if it doesn't
-      - name: Check for gradlew and generate if missing
+      # Install Gradle if gradlew doesn't exist
+      - name: Download Gradle Wrapper
         run: |
           if [ ! -f gradlew ]; then
             echo "gradlew not found, generating it..."
-            mkdir -p gradle
             curl -sSL https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -o gradle.zip
-            unzip gradle.zip -d gradle
-            rm gradle.zip
-            cd gradle/gradle-7.4.2/bin
-            ./gradle wrapper --gradle-version 7.4.2
-            cp gradlew ../../..
-            cd ../../..
+            unzip gradle.zip
+            mv gradle-7.4.2 gradle
+            chmod +x gradle/bin/gradle
           fi
 
-      # Step 7: Grant execute permission for gradlew
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # Step 8: Build APK using gradlew
-      - name: Build APK
+      # Build the app
+      - name: Build the app
         run: ./gradlew assembleDebug --stacktrace --warning-mode all --info --debug
