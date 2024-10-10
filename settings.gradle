@@ -1,2 +1,2 @@
-include ':app'
-rootProject.name = "Athaiinfo"
+rootProject.name = 'Athaiinfo'
+include ':app'  # Include the app module or other submodules if applicable
