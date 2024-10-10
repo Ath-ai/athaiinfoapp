@@ -1,31 +1,51 @@
-name: Build APK Without Gradle Wrapper
+name: Build APK
 
 on:
   push:
     branches:
-      - main
+      - main  # Runs the workflow on every push to the 'main' branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Run the job on the latest Ubuntu environment
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v3  # Checkout the repository code
 
-    - name: Set up JDK
+    - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: '11'
+        java-version: '11'  # Set the Java version to 11
 
     - name: Download Gradle
-      uses: gradle/gradle-build-action@v2  # This downloads the Gradle binary
-      with:
-        arguments: "assembleDebug"  # Run Gradle task to assemble APK
+      run: |
+        # Download and set up Gradle if it's not already present
+        mkdir -p gradle/wrapper
+        curl -L https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -o gradle-7.4.2-bin.zip
+        unzip gradle-7.4.2-bin.zip
+        rm gradle-7.4.2-bin.zip
+        # Set up the Gradle Wrapper properties file
+        echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+        echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+        echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+        echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+        echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+
+    - name: Create Gradle Wrapper
+      run: |
+        # Create the gradlew and related files
+        ./gradle-7.4.2/bin/gradle wrapper
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew  # Make sure the gradlew file is executable
+
+    - name: Build APK
+      run: ./gradlew assembleDebug  # Build the APK using the gradlew wrapper
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3  # Upload the APK as an artifact
       with:
         name: apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: app/build/outputs/apk/debug/app-debug.apk  # Path to the generated APK
