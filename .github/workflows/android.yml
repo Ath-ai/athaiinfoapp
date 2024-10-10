@@ -24,7 +24,13 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      # Step 3: Install Android SDK Command Line Tools
+      # Step 3: Install Gradle
+      - name: Set up Gradle
+        uses: gradle/wrapper-validation-action@v1
+        with:
+          gradle-version: 7.4.2  # Use the specific Gradle version you need
+
+      # Step 4: Install Android SDK Command Line Tools
       - name: Install Android SDK
         run: |
           sudo apt-get update -y
@@ -36,17 +42,17 @@ jobs:
           $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android "platforms;android-33" "build-tools;33.0.0"
           $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android "platform-tools" "tools"
 
-      # Step 4: Set environment variables for Android SDK
+      # Step 5: Set environment variables for Android SDK
       - name: Set environment variables for Android SDK
         run: echo "ANDROID_HOME=$HOME/Android" >> $GITHUB_ENV
 
-      # Step 5: Add Android SDK to PATH
+      # Step 6: Add Android SDK to PATH
       - name: Add Android SDK to PATH
         run: |
           echo "$HOME/Android/cmdline-tools/bin" >> $GITHUB_PATH
           echo "$HOME/Android/platform-tools" >> $GITHUB_PATH
 
-      # Step 6: Generate Gradle Wrapper if missing
+      # Step 7: Generate Gradle Wrapper if missing
       - name: Generate Gradle Wrapper
         run: |
           if [ ! -f gradlew ]; then
@@ -54,10 +60,10 @@ jobs:
             ./gradle wrapper --gradle-version 7.4.2
           fi
 
-      # Step 7: Grant execute permission for gradlew
+      # Step 8: Grant execute permission for gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Step 8: Build APK using gradlew
+      # Step 9: Build APK using gradlew
       - name: Build APK
         run: ./gradlew assembleDebug --stacktrace --warning-mode all --info --debug
