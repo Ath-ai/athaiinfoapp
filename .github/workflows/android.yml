@@ -11,9 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-      # Checkout the code
+      # Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -24,7 +24,7 @@ jobs:
           java-version: '11'
           distribution: 'adoptopenjdk'
 
-      # Clean Gradle Cache (optional but helpful to avoid caching issues)
+      # Clean Gradle cache to avoid issues with caching
       - name: Clean Gradle cache
         run: rm -rf ~/.gradle/caches/
 
@@ -32,7 +32,7 @@ jobs:
       - name: Ensure gradlew has executable permission
         run: chmod +x gradlew
 
-      # Install Gradle if gradlew doesn't exist
+      # Download and install Gradle wrapper if missing
       - name: Download Gradle Wrapper
         run: |
           if [ ! -f gradlew ]; then
@@ -43,6 +43,6 @@ jobs:
             chmod +x gradle/bin/gradle
           fi
 
-      # Build the app
+      # Run Gradle build task with debug output
       - name: Build the app
         run: ./gradlew assembleDebug --stacktrace --warning-mode all --info --debug
