@@ -3,29 +3,33 @@ name: Build APK
 on:
   push:
     branches:
-      - main
+      - main  # Runs on every push to main branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Runs on Ubuntu
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3  # Checkout the code in the repo
 
-    - name: Set up JDK
-      uses: actions/setup-java@v1
+    - name: Set up JDK 11  # Set up Java JDK, required by Gradle
+      uses: actions/setup-java@v3
       with:
+        distribution: 'zulu'
         java-version: '11'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Download Gradle Wrapper
+      run: ./gradlew wrapper  # Create the Gradle wrapper if missing
 
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew  # Ensure gradlew is executable
+
+    - name: Build APK
+      run: ./gradlew assembleDebug  # Assemble APK in debug mode
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3  # Updated version
+      uses: actions/upload-artifact@v3  # Upload the generated APK
       with:
         name: apk
         path: app/build/outputs/apk/debug/app-debug.apk
