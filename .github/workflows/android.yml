@@ -3,10 +3,10 @@ name: Build APK
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push to the main branch
+      - main
   pull_request:
     branches:
-      - main  # Trigger the workflow on pull requests to the main branch
+      - main
 
 jobs:
   build:
@@ -46,19 +46,22 @@ jobs:
           echo "$HOME/Android/cmdline-tools/bin" >> $GITHUB_PATH
           echo "$HOME/Android/platform-tools" >> $GITHUB_PATH
 
-      # Step 6: Check if gradlew exists, and if not, download it
-      - name: Check for gradlew and download if missing
+      # Step 6: Check for gradlew and generate if missing
+      - name: Check for gradlew and generate if missing
         run: |
           if [ ! -f gradlew ]; then
-            echo "gradlew not found, downloading..."
+            echo "gradlew not found, generating it..."
             curl -L https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -o gradle.zip
             unzip gradle.zip -d gradle
-            cp gradle/gradle-7.4.2/bin/gradlew .
+            cd gradle/gradle-7.4.2
+            ./bin/gradle wrapper
+            cp gradle/gradle-7.4.2/bin/gradlew ..
             chmod +x gradlew
+            cd ..
             rm -rf gradle gradle.zip
           fi
 
-      # Step 7: Grant execute permissions to gradlew (if necessary)
+      # Step 7: Grant execute permission for gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
