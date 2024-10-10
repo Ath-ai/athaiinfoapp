@@ -1,35 +1,31 @@
-name: Build APK
+name: Build APK Without Gradle Wrapper
 
 on:
   push:
     branches:
-      - main  # Runs on every push to main branch
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Runs on Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3  # Checkout the code in the repo
+      uses: actions/checkout@v3
 
-    - name: Set up JDK 11  # Set up Java JDK, required by Gradle
+    - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: '11'
 
-    - name: Download Gradle Wrapper
-      run: ./gradlew wrapper  # Create the Gradle wrapper if missing
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew  # Ensure gradlew is executable
-
-    - name: Build APK
-      run: ./gradlew assembleDebug  # Assemble APK in debug mode
+    - name: Download Gradle
+      uses: gradle/gradle-build-action@v2  # This downloads the Gradle binary
+      with:
+        arguments: "assembleDebug"  # Run Gradle task to assemble APK
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3  # Upload the generated APK
+      uses: actions/upload-artifact@v3
       with:
         name: apk
         path: app/build/outputs/apk/debug/app-debug.apk
