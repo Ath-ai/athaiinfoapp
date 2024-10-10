@@ -51,9 +51,21 @@ jobs:
         run: |
           if [ ! -f gradlew ]; then
             echo "gradlew not found, generating it..."
-            # Download the Gradle distribution
+            # Download the correct Gradle distribution
             curl -L https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -o gradle.zip
+            if [ $? -eq 0 ]; then
+              echo "Gradle distribution downloaded successfully"
+            else
+              echo "Failed to download Gradle distribution"
+              exit 1
+            fi
             unzip gradle.zip -d gradle
+            if [ $? -eq 0 ]; then
+              echo "Gradle distribution extracted successfully"
+            else
+              echo "Failed to extract Gradle distribution"
+              exit 1
+            fi
             cd gradle/gradle-7.4.2
             ./bin/gradle wrapper
             cp gradle/gradle-7.4.2/bin/gradlew ..
